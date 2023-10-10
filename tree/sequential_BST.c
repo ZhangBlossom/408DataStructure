@@ -5,9 +5,9 @@
 
 #define MaxSize 100
 
-typedef char TreeNodeType;
+typedef int TreeNodeType;
 
-//二叉树结构
+// 二叉树结构
 typedef struct
 {
     TreeNodeType data[MaxSize];
@@ -34,7 +34,7 @@ void postOrderTraverse(BinaryTree *T, int n);
 void levelOrderTraverse(BinaryTree *T); // 层序遍历
 bool destoryTree(BinaryTree *T);
 void traverseArray(BinaryTree *T); // 遍历数组
-
+bool isBSTUtil(BinaryTree *T, int n, TreeNodeType minVal, TreeNodeType maxVal);
 
 // 队列相关函数
 Queue *createQueue(int capacity);
@@ -42,7 +42,6 @@ bool isQueueEmpty(Queue *queue);
 bool isQueueFull(Queue *queue);
 void enqueue(Queue *queue, int item);
 int dequeue(Queue *queue);
-
 
 int main()
 {
@@ -74,9 +73,17 @@ int main()
     levelOrderTraverse(&T);
     printf("\n");
 
+    if (isBSTUtil(&T, 1, -10000, 10000))
+    {
+        printf("this is a BST");
+    }
+    else
+    {
+        printf("this is not a BST");
+    }
+
     return 0;
 }
-
 
 void initTree(BinaryTree *T)
 {
@@ -115,7 +122,6 @@ void createTree(BinaryTree *T, int n)
     }
 }
 
-
 // 计算二叉树的最大深度
 // 从根节点到叶子节点的最长路径的长度
 // 由于是顺序结构 因此这里从第一层也就是n=1开始向下遍历
@@ -136,7 +142,7 @@ int maxDepthOfTree(BinaryTree *T, int n)
     }
 }
 
-//先序遍历 根左右
+// 先序遍历 根左右
 void preOrderTraverse(BinaryTree *T, int n)
 {
     if (T->data[n] == '\0')
@@ -148,7 +154,7 @@ void preOrderTraverse(BinaryTree *T, int n)
         preOrderTraverse(T, (2 * n + 1));
     }
 }
-//中序遍历 左根由7
+// 中序遍历 左根由7
 void inOrderTraverse(BinaryTree *T, int n)
 {
     if (T->data[n] == '\0')
@@ -160,7 +166,7 @@ void inOrderTraverse(BinaryTree *T, int n)
         inOrderTraverse(T, (2 * n + 1));
     }
 }
-//后序遍历  左右根
+// 后序遍历  左右根
 void postOrderTraverse(BinaryTree *T, int n)
 {
     if (T->data[n] == '\0')
@@ -172,9 +178,11 @@ void postOrderTraverse(BinaryTree *T, int n)
         printf("%c ", T->data[n]);
     }
 }
-void traverseArray(BinaryTree *T){
-    for(int i=1;i<=T->BiTreeNum;i++){
-        printf("%c  ",T->data[i]);
+void traverseArray(BinaryTree *T)
+{
+    for (int i = 1; i <= T->BiTreeNum; i++)
+    {
+        printf("%c  ", T->data[i]);
     }
     printf("\n");
 }
@@ -283,4 +291,42 @@ int dequeue(Queue *queue)
     queue->size--;
 
     return item;
+}
+
+// 递归函数，判断以n为根的二叉树是否是BST
+bool isBSTUtil(BinaryTree *T, int n, TreeNodeType minVal, TreeNodeType maxVal)
+{
+    if (T->data[n] == '\0')
+        return true;
+
+    TreeNodeType nodeValue = T->data[n];
+
+    // 检查当前节点的值是否在[minVal, maxVal]的范围内
+    if ((nodeValue <= minVal) || ( maxVal <= nodeValue))
+        return false;
+
+    // 递归检查左子树和右子树，更新范围
+    return isBSTUtil(T, 2 * n, minVal, nodeValue) && isBSTUtil(T, 2 * n + 1, nodeValue, maxVal);
+}
+
+// 当前方法用于判断输入的树是否是二叉搜索树
+bool isBST(BinaryTree *T, int n, TreeNodeType *prev)
+{
+    if (n <= T->BiTreeNum && T->data[n] != '\0')
+    {
+        // 递归判断左子树
+        if (!isBST(T, 2 * n, prev))
+            return false;
+
+        // 判断当前节点的值是否大于前一节点
+        if (T->data[n] <= *prev)
+            return false;
+
+        // 更新前一节点的值
+        *prev = T->data[n];
+
+        // 递归判断右子树
+        return isBST(T, 2 * n + 1, prev);
+    }
+    return true;
 }
